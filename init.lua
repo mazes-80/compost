@@ -33,6 +33,7 @@ compost.compostable_nodes = {
 	'farming:wheat',
 	'farming:straw',
 	'farming:cotton',
+	'nodetest:papyrus_roots',
 }
 compost.compostable_items = {}
 for _, v in pairs(compost.compostable_nodes) do
@@ -43,8 +44,8 @@ local function formspec(pos)
 	local spos = pos.x..','..pos.y..','..pos.z
 	local formspec =
 		'size[8,8.5]'..
-		'list[nodemeta:'..spos..';src;2,0;4,1;]'..
-		'list[nodemeta:'..spos..';dst;3.5,2;1,1;]'..
+		'list[nodemeta:'..spos..';src;2,1;2,2;]'..
+		'list[nodemeta:'..spos..';dst;5,1.5;1,1;]'..
 		'list[current_player;main;0,4.25;8,1;]'..
 		'list[current_player;main;0,5.5;8,3;8]'..
 		'listring[nodemeta:'..spos ..';dst]'..
