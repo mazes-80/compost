@@ -266,8 +266,7 @@ minetest.register_node("compost:wood_barrel_empty", {
 	drawtype = "nodebox",
 	node_box = {
 		type = "fixed",
-		fixed = {{-1/2, -1/2, -1/2, 1/2, -3/8, 1/2},
-			{-1/2, -1/2, -1/2, -3/8, 1/2, 1/2},
+		fixed = {{-1/2, -1/2, -1/2, -3/8, 1/2, 1/2},
 			{3/8, -1/2, -1/2, 1/2, 1/2, 1/2},
 			{-1/2, -1/2, -1/2, 1/2, 1/2, -3/8},
 			{-1/2, -1/2, 3/8, 1/2, 1/2, 1/2}},
@@ -294,6 +293,7 @@ minetest.register_node("compost:wood_barrel_empty", {
 minetest.register_node("compost:wood_barrel", {
 	description = i18n('Compost Bin'),
 	tiles = {
+		"default_wood.png^compost_compost.png",
 		"default_wood.png^compost_compost.png",
 		"default_wood.png",
 	},
@@ -331,7 +331,7 @@ minetest.register_craft({
 	recipe = {
 		{"group:wood", "", "group:wood"},
 		{"group:wood", "", "group:wood"},
-		{"group:wood", "stairs:slab_wood", "group:wood"}
+		{"group:wood", "", "group:wood"}
 	}
 })
 
