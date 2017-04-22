@@ -40,12 +40,14 @@ for _, v in pairs(compost.compostable_nodes) do
 	compost.compostable_items[v] = true
 end
 
-local function formspec(pos)
+local function formspec(pos, progress)
 	local spos = pos.x..','..pos.y..','..pos.z
 	local formspec =
 		'size[8,8.5]'..
 		'list[nodemeta:'..spos..';src;2,1;2,2;]'..
 		'list[nodemeta:'..spos..';dst;5,1.5;1,1;]'..
+		"image[4,1.5;1,1;gui_furnace_arrow_bg.png^[lowpart:"..
+		(progress)..":gui_furnace_arrow_fg.png^[transformR270]"..
 		'list[current_player;main;0,4.25;8,1;]'..
 		'list[current_player;main;0,5.5;8,3;8]'..
 		'listring[nodemeta:'..spos ..';dst]'..
@@ -155,19 +157,26 @@ local function on_timer(pos)
 	local timer = minetest.get_node_timer(pos)
 	local meta = minetest.get_meta(pos)
 	local progress = meta:get_int('progress') + 10
+
 	if progress >= 100 then
 		create_compost(pos)
-		meta:set_int('progress', 0)
-	else
-		meta:set_int('progress', progress)
+		progress = 0
 	end
 	if count_input(pos) >= 8 then
 		meta:set_string('infotext', i18n('progress: @1%', progress))
+		meta:set_int('progress', progress)
+		-- Update formspec to show progress arrow
+		local formspec = formspec(pos, progress)
+		meta:set_string("formspec", formspec)
 		return true
 	else
 		timer:stop()
 		meta:set_string('infotext', i18n('To start composting, place some organic matter inside.'))
-		meta:set_int('progress', 0)
+		progress = 0
+		meta:set_int('progress', progress)
+		-- Update formspec to show progress arrow
+		local formspec = formspec(pos, progress)
+		meta:set_string("formspec", formspec)
 		return false
 	end
 end
@@ -182,10 +191,12 @@ local function on_construct(pos)
 end
 
 local function on_rightclick(pos, node, clicker, itemstack)
+	local meta = minetest.get_meta(pos)
+	local progress = meta:get_int('progress')
 	minetest.show_formspec(
 		clicker:get_player_name(),
 		'compost:wood_barrel',
-		formspec(pos)
+		formspec(pos, progress)
 	)
 end
 
