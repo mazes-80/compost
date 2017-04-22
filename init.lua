@@ -43,9 +43,6 @@ local function formspec(pos)
 	local spos = pos.x..','..pos.y..','..pos.z
 	local formspec =
 		'size[8,8.5]'..
-		default.gui_bg..
-		default.gui_bg_img..
-		default.gui_slots..
 		'list[nodemeta:'..spos..';src;0,0;8,1;]'..
 		'list[nodemeta:'..spos..';dst;3.5,2;1,1;]'..
 		'list[current_player;main;0,4.25;8,1;]'..
