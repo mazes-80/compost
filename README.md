@@ -12,7 +12,7 @@ empty and there is soil in the bin, it appears in the hand.
 
 Menu
 ----
-Right-clicking the bin opens its menu. 8 (2 rows by 4 cols) slots for intputs,
+Right-clicking the bin opens its menu. 2x2 slots for intputs,
 one slot for output.
 
 Once there are at least 8 pieces of acceptable inputs are inserted (stacks
@@ -51,13 +51,12 @@ Crafting
 --------
 Wood barrel:
 
-| W |   | W |
-|---|---|---|
-| W |   | W |
-| W | S | W |
+| **W** |   | **W** |
+|-------|---|-------|
+| **W** |   | **W** |
+| **W** |   | **W** |
 
 W : wood
-S : wood slab
 
 Bugs
 ----
@@ -67,3 +66,4 @@ Authors
 -------
 * Original Work: cd2 (cdqwertz) - cdqwertz.github.io
 * Modified Work: Vitalie Ciubotaru <vitalie at ciubotaru dot tk>
+* Modified Work: Casimir
