@@ -86,7 +86,7 @@ end
 
 -- choose the seed
 function compost.get_rare_seed()
-	if math.random(100) == 1 then
+	if math.random(30) == 1 then
 		return compost.rare_seeds[math.random(#compost.rare_seeds)]
 	end
 end
