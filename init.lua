@@ -3,9 +3,9 @@
 --License: General Public License, version 3 or later
 --Original Work Copyright (C) 2016 cd2 (cdqwertz) <cdqwertz@gmail.com>
 --Modified Work Copyright (C) Vitalie Ciubotaru <vitalie at ciubotaru dot tk>
+--Modified Work Copyright (C) 2017 bell07
 
 minetest.log('action', 'MOD: Compost loading...')
-compost_version = '0.0.1'
 
 local i18n --internationalization
 	if minetest.get_modpath("intllib") then
@@ -22,50 +22,63 @@ minetest.log('action', 'intllib loaded')
 end
 
 compost = {}
-compost.compostable_groups = {'flora', 'leaves', 'flower', 'sapling'}
-compost.compostable_nodes = {
-	'default:cactus',
-	'default:papyrus',
-	'default:dry_shrub',
-	'default:junglegrass',
-	'default:grass_1',
-	'default:dry_grass_1',
-	'farming:wheat',
-	'farming:straw',
-	'farming:cotton',
-	'nodetest:papyrus_roots',
+compost.compostable_groups = {'flora', 'leaves', 'flower', 'plant', 'sapling'}
+--compost.compostable_items_indexed = {}
+compost.compostable_items = {
+	['default:papyrus'] = true,
+	['farming:wheat'] = true,
 }
-compost.compostable_items = {}
-for _, v in pairs(compost.compostable_nodes) do
-	compost.compostable_items[v] = true
-end
 
-compost.rare_seeds = {}
+compost.returnable_groups = {'flora', 'sapling', 'seed'}
+compost.returnable_items_indexed = {}
+compost.returnable_items = {
+	['flowers:waterlily'] = true,
+ }
 
-local seeds_dedup = {}
--- add simple decorations (flowers, grass, mushrooms) to rare seeds list
-for _, deco in pairs(minetest.registered_decorations) do
-	if deco.deco_type == "simple" then
-		local entry = deco.decoration
-		local list = minetest.get_node_drops(entry)
-		for _, itemname in ipairs(list) do
-			seeds_dedup[itemname] = true
+function compost.collect_items()
+	local farming_plus_support = minetest.get_modpath('farming_plus')
+
+	-- add simple decorations (flowers, grass, mushrooms) to returnable list
+	for _, deco in pairs(minetest.registered_decorations) do
+		if deco.deco_type == "simple" then
+			local entry = deco.decoration
+			local list = minetest.get_node_drops(entry)
+			for _, itemname in ipairs(list) do
+				compost.returnable_items[itemname] = true
+			end
 		end
 	end
-end
--- add saplings and flowers by group to the rare seeds list
-for _, item in pairs(minetest.registered_items) do
-	if item.groups.sapling or item.groups.flower then
-		seeds_dedup[item.name] = true
+
+	-- Parse both groups lists to the items lists
+	for itemname, item in pairs(minetest.registered_items) do
+		if not item.groups.not_in_creative_inventory then
+			for _, group in ipairs(compost.compostable_groups) do
+				if item.groups[group] then
+					compost.compostable_items[itemname] = true
+				end
+			end
+			for _, group in ipairs(compost.returnable_groups) do
+				if item.groups[group] then
+					compost.returnable_items[itemname] = true
+				end
+			end
+		end
+
+		-- farming plus seeds support
+		if item.mod_origin == 'farming_plus' and itemname:sub(-4) == 'seed' then
+			compost.returnable_items[itemname] = true
+		end
+	end
+
+	-- build the indexed tables
+--	for k,_ in pairs(compost.compostable_items) do
+--		table.insert(compost.compostable_items_indexed, k)
+--	end
+	for k,_ in pairs(compost.returnable_items) do
+		table.insert(compost.returnable_items_indexed, k)
 	end
 end
--- add to indexed table
-for k,_ in pairs(seeds_dedup) do
-	table.insert(compost.rare_seeds, k)
-	-- all output flora things are compostable
-	compost.compostable_items[k] = true
-end
-
+minetest.after(0,compost.collect_items)
 
 local function formspec(pos, progress)
 	local spos = pos.x..','..pos.y..','..pos.z
@@ -87,20 +100,16 @@ end
 -- choose the seed
 function compost.get_rare_seed()
 	if math.random(30) == 1 then
-		return compost.rare_seeds[math.random(#compost.rare_seeds)]
+		return compost.returnable_items_indexed[math.random(#compost.returnable_items_indexed)]
 	end
 end
 
 function compost.is_compostable(input)
 	if compost.compostable_items[input] then
 		return true
+	else
+		return false
 	end
-	for _, v in pairs(compost.compostable_groups) do
-		if minetest.get_item_group(input, v) > 0 then
-			return true
-		end
-	end
-	return false
 end
 
 local function swap_node(pos, name)
@@ -361,4 +370,4 @@ minetest.register_craft({
 	}
 })
 
-minetest.log('action', 'MOD: Compost version ' .. compost_version .. ' loaded.')
+minetest.log('action', 'MOD: Compost loaded.')
