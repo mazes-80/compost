@@ -51,12 +51,12 @@ function compost.collect_items()
 
 	-- Parse both groups lists to the items lists
 	for itemname, item in pairs(minetest.registered_items) do
-		if not item.groups.not_in_creative_inventory then
-			for _, group in ipairs(compost.compostable_groups) do
-				if item.groups[group] then
-					compost.compostable_items[itemname] = true
-				end
+		for _, group in ipairs(compost.compostable_groups) do
+			if item.groups[group] then
+				compost.compostable_items[itemname] = true
 			end
+		end
+		if not item.groups.not_in_creative_inventory then
 			for _, group in ipairs(compost.returnable_groups) do
 				if item.groups[group] then
 					compost.returnable_items[itemname] = true
