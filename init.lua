@@ -33,6 +33,7 @@ compost.returnable_groups = {'flora', 'sapling', 'seed'}
 compost.returnable_items_indexed = {}
 compost.returnable_items = {
 	['flowers:waterlily'] = true,
+	['default:papyrus'] = true,
  }
 
 function compost.collect_items()
@@ -77,6 +78,7 @@ function compost.collect_items()
 	for k,_ in pairs(compost.returnable_items) do
 		table.insert(compost.returnable_items_indexed, k)
 	end
+	--print(dump(compost.returnable_items))
 end
 minetest.after(0,compost.collect_items)
 
