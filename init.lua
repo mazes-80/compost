@@ -36,6 +36,21 @@ compost.returnable_items = {
 	['default:papyrus'] = true,
  }
 
+local function clear_item_name(itemname)
+	local out_itemname = itemname:gsub('"','')
+	out_itemname = minetest.registered_aliases[out_itemname] or out_itemname
+	if not minetest.registered_items[out_itemname] then
+		for z in out_itemname:gmatch("[^%s]+") do
+			local item = minetest.registered_aliases[z] or z
+			if minetest.registered_items[item] then
+				out_itemname = item
+			end
+			break
+		end
+	end
+	return out_itemname
+end
+
 function compost.collect_items()
 	local farming_plus_support = minetest.get_modpath('farming_plus')
 
@@ -45,7 +60,10 @@ function compost.collect_items()
 			local entry = deco.decoration
 			local list = minetest.get_node_drops(entry)
 			for _, itemname in ipairs(list) do
-				compost.returnable_items[itemname] = true
+				local clear_name = clear_item_name(itemname)
+				if clear_name then
+					compost.returnable_items[clear_name] = true
+				end
 			end
 		end
 	end
@@ -78,7 +96,8 @@ function compost.collect_items()
 	for k,_ in pairs(compost.returnable_items) do
 		table.insert(compost.returnable_items_indexed, k)
 	end
-	--print(dump(compost.returnable_items))
+--	print("compostable", dump(compost.compostable_items))
+--	print("returnable", dump(compost.returnable_items))
 end
 minetest.after(0,compost.collect_items)
 
