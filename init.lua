@@ -27,6 +27,9 @@ compost.compostable_groups = {'flora', 'leaves', 'flower', 'plant', 'sapling'}
 compost.compostable_items = {
 	['default:papyrus'] = true,
 	['farming:wheat'] = true,
+	['default:sand_with_kelp'] = true,
+	['default:marram_grass_1'] = true,
+
 }
 
 compost.returnable_groups = {'flora', 'sapling', 'seed'}
@@ -183,7 +186,7 @@ local function update_timer(pos)
 		timer:stop()
 		progress = 0
 		meta:set_int('progress', progress)
-		meta:set_string('infotext', i18n('To start composting, place some organic matter inside.'))
+		meta:set_string('infotext', i18n('To start composting, fill every input slot with organic matter.'))
 	else
 		if not timer:is_started() then
 			timer:start(30)
