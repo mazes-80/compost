@@ -35,7 +35,7 @@ Outputs
 ------
 The common output is the default:dirt.
 But sometimes an other random vergeatble appears in output slot (Useful in singlenode worlds).
-Abstract an new vegetable grows on compoast. The possible output vegetables are group
+Abstract an new vegetable grows on compost. The possible output vegetables are group
 flora, sapling, seed or registered decoration with deco_type "simple".
 
 Nodebox
