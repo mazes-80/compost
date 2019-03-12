@@ -5,8 +5,6 @@
 --Modified Work Copyright (C) Vitalie Ciubotaru <vitalie at ciubotaru dot tk>
 --Modified Work Copyright (C) 2017 bell07
 
-minetest.log('action', 'MOD: Compost loading...')
-
 local i18n --internationalization
 	if minetest.get_modpath("intllib") then
 minetest.log('action', 'intllib loaded')
@@ -21,23 +19,27 @@ minetest.log('action', 'intllib loaded')
 	end
 end
 
-compost = {}
-compost.compostable_groups = {'flora', 'leaves', 'flower', 'plant', 'sapling'}
---compost.compostable_items_indexed = {}
-compost.compostable_items = {
-	['default:papyrus'] = true,
-	['farming:wheat'] = true,
-	['default:sand_with_kelp'] = true,
-	['default:marram_grass_1'] = true,
+compost = {
+	processing_duration = tonumber(minetest.settings:get("compost_duration_seconds")) or 300,
+	compostable_groups = {'flora', 'leaves', 'flower', 'plant', 'sapling'},
+	compostable_items = {
+		['default:papyrus'] = true,
+		['farming:wheat'] = true,
+		['default:sand_with_kelp'] = true,
+		['default:marram_grass_1'] = true,
+	},
+	base_return_item = "default:dirt",
 
+	returnable_rarity = tonumber(minetest.settings:get("compost_extra_result_rarity")) or 300,
+	returnable_groups = {'flora', 'sapling', 'seed'},
+	returnable_items_indexed = {},
+	returnable_items = {
+		['flowers:waterlily'] = true,
+		['default:papyrus'] = true,
+	}
 }
 
-compost.returnable_groups = {'flora', 'sapling', 'seed'}
-compost.returnable_items_indexed = {}
-compost.returnable_items = {
-	['flowers:waterlily'] = true,
-	['default:papyrus'] = true,
- }
+local garden_soil = minetest.settings:get_bool("compost_garden_soil") ~= false
 
 local function clear_item_name(itemname)
 	local out_itemname = itemname:gsub('"','')
@@ -55,8 +57,6 @@ local function clear_item_name(itemname)
 end
 
 function compost.collect_items()
-	local farming_plus_support = minetest.get_modpath('farming_plus')
-
 	-- add simple decorations (flowers, grass, mushrooms) to returnable list
 	for _, deco in pairs(minetest.registered_decorations) do
 		if deco.deco_type == "simple" then
@@ -106,8 +106,7 @@ minetest.after(0,compost.collect_items)
 
 local function formspec(pos, progress)
 	local spos = pos.x..','..pos.y..','..pos.z
-	local formspec =
-		'size[8,8.5]'..
+	return 'size[8,8.5]'..
 		'list[nodemeta:'..spos..';src;0.5,1;4,2;]'..
 		'list[nodemeta:'..spos..';dst;5.5,1;2,2;]'..
 		"image[4.5,1.5;1,1;gui_furnace_arrow_bg.png^[lowpart:"..
@@ -118,12 +117,11 @@ local function formspec(pos, progress)
 		'listring[nodemeta:'..spos ..';src]'..
 		'listring[current_player;main]'..
 		default.get_hotbar_bg(0, 4.25)
-	return formspec
 end
 
 -- choose the seed
 function compost.get_rare_seed()
-	if math.random(30) == 1 then
+	if compost.returnable_rarity > 0 and math.random(compost.returnable_rarity) == 1 then
 		return compost.returnable_items_indexed[math.random(#compost.returnable_items_indexed)]
 	end
 end
@@ -147,7 +145,7 @@ end
 
 local function is_distributed(pos)
 	local meta = minetest.get_meta(pos)
-	for k, stack in pairs(meta:get_inventory():get_list('src')) do
+	for _, stack in pairs(meta:get_inventory():get_list('src')) do
 		if stack:is_empty() then
 			return false
 		end
@@ -189,7 +187,7 @@ local function update_timer(pos)
 		meta:set_string('infotext', i18n('To start composting, fill every input slot with organic matter.'))
 	else
 		if not timer:is_started() then
-			timer:start(30)
+			timer:start(compost.processing_duration / 10)
 		end
 		meta:set_string('infotext', i18n('progress: @1%', progress))
 	end
@@ -205,12 +203,11 @@ function compost.create_compost(pos)
 		stack:take_item()
 		inv:set_stack('src', k, stack)
 	end
-	local item = compost.get_rare_seed() or 'default:dirt'
+	local item = compost.get_rare_seed() or compost.base_return_item
 	inv:add_item("dst", item)
 end
 
 local function on_timer(pos)
-	local timer = minetest.get_node_timer(pos)
 	local meta = minetest.get_meta(pos)
 	local progress = meta:get_int('progress') + 10
 	if progress >= 100 then
@@ -271,7 +268,7 @@ end
 
 local function allow_metadata_inventory_move(pos, from_list, from_index, to_list, to_index, count, player)
 	local inv = minetest.get_meta(pos):get_inventory()
-	if from_list == to_list then 
+	if from_list == to_list then
 		return inv:get_stack(from_list, from_index):get_count()
 	else
 		return 0
@@ -282,7 +279,7 @@ local function on_punch(pos, node, player, pointed_thing)
 	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 	local wielded_item = player:get_wielded_item()
-	if not wielded_item:is_empty() and wielded_item:get_name() ~= 'default:dirt' then
+	if not wielded_item:is_empty() and wielded_item:get_name() ~= compost.base_return_item then
 		-- anything wielded. Try to place it to the compost
 		if compost.is_compostable(wielded_item:get_name()) then
 			if is_distributed(pos) then
@@ -394,4 +391,34 @@ minetest.register_craft({
 	}
 })
 
-minetest.log('action', 'MOD: Compost loaded.')
+minetest.register_craft({
+	output = "default:wood 6",
+	recipe = {
+		{ "compost:wood_barrel_empty" }
+	}
+})
+
+minetest.register_craft({
+	type = "fuel",
+	recipe = "compost:wood_barrel_empty",
+	burntime = 45,
+})
+
+
+if garden_soil then
+	minetest.register_node("compost:garden_soil", {
+		description = i18n("Garden Soil"),
+		tiles = {"compost_garden_soil.png"},
+		groups = {crumbly = 3, soil=3, grassland = 1, wet = 1},
+		sounds =  default.node_sound_dirt_defaults(),
+	})
+
+	minetest.register_craft({
+		type = "cooking",
+		cooktime = 3,
+		output = "default:dirt",
+		recipe = "compost:garden_soil",
+	})
+
+	compost.base_return_item = "compost:garden_soil"
+end
