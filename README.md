@@ -1,4 +1,4 @@
-Compost Mod v0.0.1
+Compost Mod (bell07 version)
 ==================
 Compost bins turn organic matter like leaves, flowers, grass etc into soil. The
 bin is operated by punching or right-clicking.
@@ -12,11 +12,11 @@ empty and there is soil in the bin, it appears in the hand.
 
 Menu
 ----
-Right-clicking the bin opens its menu. 2x2 slots for intputs,
-one slot for output.
+Right-clicking the bin opens its menu. 4x2 slots for intputs 
+and 2x2 slots for output.
 
-Once there are at least 8 pieces of acceptable inputs are inserted (stacks
-OK), a timer starts. Every 30 seconds it adds 10% to the composting progress, so
+Once there are at least 8 pieces of acceptable inputs are inserted (each input slot is filled),
+a timer starts. Every 30 seconds it adds 10% to the composting progress, so
 it takes 5 minutes to create a block of soil.
 
 Once 100% is reached, 8 pieces of input disappear and one block of soil is
@@ -28,8 +28,15 @@ works like a small chest).
 
 Inputs
 ------
-Acceptable inputs are group:flora (flowers and grasses) and group:leaves. Other
+Acceptable inputs are groups flora, leaves, flower, plant, sapling. Other
 inputs are rejected. Food is rejected on esthetical grounds :-)
+
+Outputs
+------
+The common output is the default:dirt.
+But sometimes an other random vergeatble appears in output slot (Useful in singlenode worlds).
+Abstract an new vegetable grows on compoast. The possible output vegetables are group
+flora, sapling, seed or registered decoration with deco_type "simple".
 
 Nodebox
 -------
@@ -68,3 +75,4 @@ Authors
 * Original Work: cd2 (cdqwertz) - cdqwertz.github.io
 * Modified Work: Vitalie Ciubotaru <vitalie at ciubotaru dot tk>
 * Modified Work: Casimir
+* Modified work: bell07
