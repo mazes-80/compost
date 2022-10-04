@@ -254,12 +254,11 @@ local function on_metadata_inventory_move(pos, from_list, from_index, to_list, t
 end
 
 local function allow_metadata_inventory_move(pos, from_list, from_index, to_list, to_index, count, player)
-	local inv = minetest.get_meta(pos):get_inventory()
-	if from_list == to_list then
-		return inv:get_stack(from_list, from_index):get_count()
-	else
+	if minetest.is_protected(pos, player:get_player_name()) or from_list ~= to_list then
 		return 0
 	end
+	local inv = minetest.get_meta(pos):get_inventory()
+	return inv:get_stack(from_list, from_index):get_count()
 end
 
 local function on_punch(pos, node, player, pointed_thing)
