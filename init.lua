@@ -225,11 +225,11 @@ local function can_dig(pos,player)
 end
 
 local function allow_metadata_inventory_put(pos, listname, index, stack, player)
-	if listname == 'src' and compost.is_compostable(stack:get_name()) then
-		return stack:get_count()
-	else
+	if minetest.is_protected(pos, player:get_player_name()) or
+		( listname ~= 'src' and not compost.is_compostable(stack:get_name())) then
 		return 0
 	end
+	return stack:get_count()
 end
 
 local function on_metadata_inventory_put(pos, listname, index, stack, player)
